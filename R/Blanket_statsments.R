@@ -1,5 +1,5 @@
 # Wrapper methods to build common models quickly with a set of static covariables
-# J. Peter Marquardt, 2021-07-27
+# Dr J. Peter Amin Marquardt, 2026
 
 
 #' Build a cox model
@@ -64,7 +64,7 @@ build_cox_model <- function(df, event_time, event_censor, predictors, covariates
 #' @author J. Peter Marquardt
 build_reg_model <- function(df, outcome, predictors, covariates=c(), modality='linear', verbose = FALSE){
 
-  stopifnot(modality %in% c('linear', 'logistic'))  # check that a correct modality is specified
+  stopifnot("'modallity' must be 'linear' or 'logistic'" = modality %in% c('linear', 'logistic'))   # check that a correct modality is specified
 
   variables <- append(covariates, predictors) # merging all into one vector
 
@@ -165,7 +165,7 @@ calculate_Uno_c <- function(df, model, verbose = FALSE){
 #' @author J. Peter Marquardt
 blanket_c_statistic <- function(df, model_list, modality = 'logistic', verbose = FALSE) {
 
-  stopifnot(modality %in% c('linear', 'logistic', 'cox'))  # check that a correct modality is specified
+  stopifnot("'modallity' must be 'linear', 'logistic', or 'cox'" = modality %in% c('linear', 'logistic', 'cox'))  # check that a correct modality is specified
   cstat_list <- vector(mode = "list", length = 0)  # initialising list of objects we intend to output
 
   for (model_name in names(model_list)) {  # iterate over models in list
@@ -259,7 +259,7 @@ table_predictors <- function(df, model, predictors) {
 #' @author J. Peter Marquardt
 blanket_stats <- function(df, outcome, predictor_sets, covariates=c(), modality = 'linear', event_censor = NA, verbose = FALSE) {
 
-  stopifnot(modality %in% c('linear', 'logistic', 'cox'))  # check that a correct modality is specified
+  stopifnot("'modallity' must be 'linear', 'logistic', or 'cox'" = modality %in% c('linear', 'logistic', 'cox'))   # check that a correct modality is specified
   model_list <- vector(mode = "list", length = 0)  # initialising list of objects we intend to output
 
   if (modality == 'cox') {  # we're building cox regression models
@@ -465,7 +465,7 @@ table_blanket_statsments <- function(df, blanket_statsment_models){
 #'
 #' @examples
 #' data <- survival::lung
-#' mod <- build_reg_model(data, 'age', c('sex'))
+#' mod <- build_reg_model(data, 'meal.cal', c('sex', 'age'))
 #' redundancy_analysis(mod, data)
 #'
 #' @importFrom Hmisc redun
@@ -474,7 +474,11 @@ table_blanket_statsments <- function(df, blanket_statsment_models){
 #'
 #' @author J. Peter Marquardt
 redundancy_analysis <- function(model, data, r2_threshold=0.9, nk=0){
-  # seperate paths depending on model type
+
+  # For a valid redundancy analysis, there need to be at least two independent variables, so the formula should contain a "+" in the predictor set
+  stopifnot("Redundancy analysis is only possible on models with at least two independent variables" = grepl("+", as.character(stats::formula(model))[3], fixed = TRUE))
+
+  # separate paths depending on model type
   if ('coxph' %in% class(model)){
     outcome <- as.character(model$formula[[2]][2])
     predictors <- paste(as.character(model$formula[[3]])[-1], collapse = ' + ')
@@ -588,14 +592,13 @@ table_blanket_redundancies <- function(blanket_redundancies, digits=2){
 #'
 #' @source \link[basecamb]{build_model_formula}
 #'
-#' @importFrom assertive.types assert_is_character
 #' @importFrom survival Surv
 #'
 #' @author J. Peter Marquardt
 .build_model_formula <- function(outcome, predictors, censor_event=NULL) {
 
-  assertive.types::assert_is_character(outcome)
-  assertive.types::assert_is_character(predictors)
+  stopifnot("'Outcome' must be a character string" = is.character(outcome))
+  stopifnot("'Predictors' must be a character string" = is.character(predictors))
 
   if(is.null(censor_event)) {  # standard formula
     frml <- as.formula(paste(outcome,
@@ -605,7 +608,7 @@ table_blanket_redundancies <- function(blanket_redundancies, digits=2){
   }
 
   else {  # Survival-type formula
-    assertive.types::assert_is_character(censor_event)
+    stopifnot("'censor_event' must be a character string" = is.character(censor_event))
     frml <- as.formula(paste('Surv(',
                              outcome,
                              ', ',

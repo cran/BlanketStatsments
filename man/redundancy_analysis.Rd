@@ -23,7 +23,7 @@ Perform a redundancy analysis on an existing model
 }
 \examples{
 data <- survival::lung
-mod <- build_reg_model(data, 'age', c('sex'))
+mod <- build_reg_model(data, 'meal.cal', c('sex', 'age'))
 redundancy_analysis(mod, data)
 
 }

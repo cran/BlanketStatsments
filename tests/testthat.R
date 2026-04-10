@@ -1,4 +1,4 @@
 library(testthat)
 library(BlanketStatsments)
 
-test_check("BlanketStatsments")
+testthat::test_check("BlanketStatsments")
